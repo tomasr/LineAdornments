@@ -20,8 +20,9 @@ namespace Winterdom.VisualStudio.Extensions.Text {
    [Order(Before = Priority.Default)]
    sealed class FlowControlFormat : ClassificationFormatDefinition {
       public FlowControlFormat() {
-         this.BackgroundColor = Color.FromArgb(0xFF, 0x22, 0x22, 0x22);
+         this.BackgroundColor = Color.FromArgb(0xFF, 0xEB, 0xEB, 0xEB);
          this.ForegroundColor = Colors.Silver;
+         this.BackgroundOpacity = 0.4;
       }
    }
 
