@@ -18,8 +18,8 @@ namespace Winterdom.VisualStudio.Extensions.Text {
    [DisplayName("Current Line")]
    [UserVisible(true)]
    [Order(Before = Priority.Default)]
-   sealed class FlowControlFormat : ClassificationFormatDefinition {
-      public FlowControlFormat() {
+   sealed class CurrentLineFormat : ClassificationFormatDefinition {
+      public CurrentLineFormat() {
          this.BackgroundColor = Color.FromArgb(0xFF, 0xEB, 0xEB, 0xEB);
          this.ForegroundColor = Colors.Silver;
          this.BackgroundOpacity = 0.4;

@@ -65,9 +65,6 @@ namespace Winterdom.VisualStudio.Extensions.Text {
       }
 
       private void CreateDrawingObjects() {
-         Brush oldFillBrush = fillBrush;
-         Pen oldBorderPen = borderPen;
-
          // this gets the color settings configured by the
          // user in Fonts and Colors (or the default in out
          // classification type).
@@ -106,7 +103,7 @@ namespace Winterdom.VisualStudio.Extensions.Text {
                g.Bounds.TopLeft, 
                new Point(maxRight, g.Bounds.Bottom)
             );
-            g = new RectangleGeometry(nr, 1.1, 1.1);
+            g = new RectangleGeometry(nr, 1.0, 1.0);
 
             GeometryDrawing drawing = new GeometryDrawing(fillBrush, borderPen, g);
             drawing.Freeze();
