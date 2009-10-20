@@ -111,6 +111,8 @@ namespace Winterdom.VisualStudio.Extensions.Text {
             drawingImage.Freeze();
 
             Image image = new Image();
+            // work around WPF rounding bug
+            image.UseLayoutRounding = false;
             image.Source = drawingImage;
             //Align the image with the top of the bounds of the text geometry
             Canvas.SetLeft(image, g.Bounds.Left);
