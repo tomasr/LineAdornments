@@ -1,5 +1,4 @@
 using System.ComponentModel.Composition;
-using Microsoft.VisualStudio.ApplicationModel.Environments;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Utilities;
 using Microsoft.VisualStudio.Text.Classification;
@@ -37,11 +36,11 @@ namespace Winterdom.VisualStudio.Extensions.Text {
 
       [Export(typeof(AdornmentLayerDefinition))]
       [Name(LineHighlight.NAME)]
-      [Order(Before = DefaultAdornmentLayers.Selection)]
+      [Order(Before = "Selection")]
       [TextViewRole(PredefinedTextViewRoles.Document)]
       public AdornmentLayerDefinition editorAdornmentLayer = null;
 
-      public void TextViewCreated(IWpfTextView textView, IEnvironment context) {
+      public void TextViewCreated(IWpfTextView textView) {
          IClassificationType classification =
             ClassificationRegistry.GetClassificationType(LineHighlight.NAME);
          IClassificationFormatMap map =

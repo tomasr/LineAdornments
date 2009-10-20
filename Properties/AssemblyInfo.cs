@@ -1,11 +1,7 @@
 ﻿using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using Microsoft.VisualStudio.ExtensibilityHosting;
 
-
-//Select the right catalog for MEF to pick up the extension
-[assembly: VsCatalogName("Microsoft.VisualStudio.Editor")]
 
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
