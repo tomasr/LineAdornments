@@ -90,39 +90,30 @@ namespace Winterdom.VisualStudio.Extensions.Text {
          IWpfTextViewLineCollection textViewLines = view.TextViewLines;
          if ( textViewLines == null )
             return; // not ready yet.
-         int start = line.Start;
-         int end = line.End;
+         SnapshotSpan span = line.SnapshotLine.Extent;
+         Rect rc = new Rect(
+            new Point(line.Left, line.Top),
+            new Point(Math.Max(view.ViewportRight - 2, line.Right), line.Bottom)
+         );
 
-         SnapshotSpan span = 
-            new SnapshotSpan(view.TextSnapshot, Span.FromBounds(start, end));
-         Geometry g = textViewLines.GetMarkerGeometry(span);
-         if ( g != null ) {
-            // adjust the adornment location
-            double maxRight = Math.Max(view.ViewportRight-2, g.Bounds.Right);
-            Rect nr = new Rect(
-               g.Bounds.TopLeft, 
-               new Point(maxRight, g.Bounds.Bottom)
-            );
-            g = new RectangleGeometry(nr, 1.0, 1.0);
+         Geometry g = new RectangleGeometry(rc, 1.0, 1.0);
+         GeometryDrawing drawing = new GeometryDrawing(fillBrush, borderPen, g);
+         drawing.Freeze();
+         DrawingImage drawingImage = new DrawingImage(drawing);
+         drawingImage.Freeze();
 
-            GeometryDrawing drawing = new GeometryDrawing(fillBrush, borderPen, g);
-            drawing.Freeze();
-            DrawingImage drawingImage = new DrawingImage(drawing);
-            drawingImage.Freeze();
+         Image image = new Image();
+         // work around WPF rounding bug
+         image.UseLayoutRounding = false;
+         image.Source = drawingImage;
+         //Align the image with the top of the bounds of the text geometry
+         Canvas.SetLeft(image, g.Bounds.Left);
+         Canvas.SetTop(image, g.Bounds.Top);
 
-            Image image = new Image();
-            // work around WPF rounding bug
-            image.UseLayoutRounding = false;
-            image.Source = drawingImage;
-            //Align the image with the top of the bounds of the text geometry
-            Canvas.SetLeft(image, g.Bounds.Left);
-            Canvas.SetTop(image, g.Bounds.Top);
-
-            layer.AddAdornment(
-               AdornmentPositioningBehavior.TextRelative, span, 
-               CUR_LINE_TAG, image, null
-            );
-         }
+         layer.AddAdornment(
+            AdornmentPositioningBehavior.TextRelative, span,
+            CUR_LINE_TAG, image, null
+         );
       }
    }
 }
