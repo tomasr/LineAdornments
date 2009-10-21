@@ -19,9 +19,9 @@ namespace Winterdom.VisualStudio.Extensions.Text {
    [Order(Before = Priority.Default)]
    sealed class CurrentLineFormat : ClassificationFormatDefinition {
       public CurrentLineFormat() {
-         this.BackgroundColor = Color.FromArgb(0xFF, 0xEB, 0xEB, 0xEB);
-         this.ForegroundColor = Colors.Silver;
-         this.BackgroundOpacity = 0.4;
+         this.BackgroundColor = Colors.Teal;
+         this.ForegroundColor = Colors.DarkCyan;
+         this.BackgroundOpacity = 0.3;
       }
    }
 
