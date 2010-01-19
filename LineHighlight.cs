@@ -12,7 +12,7 @@ using Microsoft.VisualStudio.Text.Classification;
 namespace Winterdom.VisualStudio.Extensions.Text {
 
    public class LineHighlight {
-      public const string NAME = "LineHighlight";
+      public const string NAME = "Current Line";
       public const string CUR_LINE_TAG = "currentLine";
       private IAdornmentLayer layer;
       private IWpfTextView view;
@@ -20,6 +20,7 @@ namespace Winterdom.VisualStudio.Extensions.Text {
       private IClassificationType formatType;
       private Brush fillBrush;
       private Pen borderPen;
+      private Image currentHighlight = null;
 
       public LineHighlight(
             IWpfTextView view, IClassificationFormatMap formatMap, 
@@ -32,18 +33,23 @@ namespace Winterdom.VisualStudio.Extensions.Text {
          view.Caret.PositionChanged += OnCaretPositionChanged;
          view.ViewportWidthChanged += OnViewportWidthChanged;
          view.LayoutChanged += OnLayoutChanged;
+         view.ViewportLeftChanged += OnViewportLeftChanged;
          formatMap.ClassificationFormatMappingChanged += 
             OnClassificationFormatMappingChanged;
 
          CreateDrawingObjects();
       }
 
+      void OnViewportLeftChanged(object sender, EventArgs e) {
+         RedrawAdornments();
+      }
       void OnViewportWidthChanged(object sender, EventArgs e) {
          RedrawAdornments();
       }
       void OnClassificationFormatMappingChanged(object sender, EventArgs e) {
          // the user changed something in Fonts and Colors, so
          // recreate our addornments
+         this.currentHighlight = null;
          CreateDrawingObjects();
       }
       void OnCaretPositionChanged(object sender, CaretPositionChangedEventArgs e) {
@@ -58,6 +64,7 @@ namespace Winterdom.VisualStudio.Extensions.Text {
          SnapshotPoint caret = view.Caret.Position.BufferPosition;
          foreach ( var line in e.NewOrReformattedLines ) {
             if ( line.ContainsBufferPosition(caret) ) {
+               this.currentHighlight = null; // force recalculation
                this.CreateVisuals(line);
                break;
             }
@@ -78,10 +85,15 @@ namespace Winterdom.VisualStudio.Extensions.Text {
          RedrawAdornments();
       }
       private void RedrawAdornments() {
-         layer.RemoveAdornmentsByTag(CUR_LINE_TAG);
-         var caret = view.Caret.Position;
-         ITextViewLine line = GetLineByPos(caret);
-         this.CreateVisuals(line);
+         if ( view.TextViewLines != null ) {
+            if ( currentHighlight != null ) {
+               layer.RemoveAdornment(currentHighlight);
+            }
+            this.currentHighlight = null; // force redraw
+            var caret = view.Caret.Position;
+            ITextViewLine line = GetLineByPos(caret);
+            this.CreateVisuals(line);
+         }
       }
       private ITextViewLine GetLineByPos(CaretPosition pos) {
          return view.GetTextViewLineContainingBufferPosition(pos.BufferPosition);
@@ -90,30 +102,44 @@ namespace Winterdom.VisualStudio.Extensions.Text {
          IWpfTextViewLineCollection textViewLines = view.TextViewLines;
          if ( textViewLines == null )
             return; // not ready yet.
-         SnapshotSpan span = line.SnapshotLine.Extent;
+         SnapshotSpan span = line.Extent;
          Rect rc = new Rect(
             new Point(line.Left, line.Top),
             new Point(Math.Max(view.ViewportRight - 2, line.Right), line.Bottom)
          );
 
-         Geometry g = new RectangleGeometry(rc, 1.0, 1.0);
-         GeometryDrawing drawing = new GeometryDrawing(fillBrush, borderPen, g);
-         drawing.Freeze();
-         DrawingImage drawingImage = new DrawingImage(drawing);
-         drawingImage.Freeze();
+         if ( NeedsNewImage(rc) ) {
+            Geometry g = new RectangleGeometry(rc, 1.0, 1.0);
+            GeometryDrawing drawing = new GeometryDrawing(fillBrush, borderPen, g);
+            drawing.Freeze();
+            DrawingImage drawingImage = new DrawingImage(drawing);
+            drawingImage.Freeze();
+            Image image = new Image();
+            // work around WPF rounding bug
+            image.UseLayoutRounding = false;
+            image.Source = drawingImage;
+            currentHighlight = image;
+         }
 
-         Image image = new Image();
-         // work around WPF rounding bug
-         image.UseLayoutRounding = false;
-         image.Source = drawingImage;
          //Align the image with the top of the bounds of the text geometry
-         Canvas.SetLeft(image, g.Bounds.Left);
-         Canvas.SetTop(image, g.Bounds.Top);
+         Canvas.SetLeft(currentHighlight, rc.Left);
+         Canvas.SetTop(currentHighlight, rc.Top);
 
          layer.AddAdornment(
             AdornmentPositioningBehavior.TextRelative, span,
-            CUR_LINE_TAG, image, null
+            CUR_LINE_TAG, currentHighlight, null
          );
+      }
+      private bool NeedsNewImage(Rect rc) {
+         if ( currentHighlight == null )
+            return true;
+         if ( AreClose(currentHighlight.Width, rc.Width) )
+            return true;
+         return AreClose(currentHighlight.Height, rc.Height);
+      }
+      private bool AreClose(double d1, double d2) {
+         double diff = d1 - d2;
+         return Math.Abs(diff) < 0.1;
       }
    }
 }

@@ -14,7 +14,6 @@ namespace Winterdom.VisualStudio.Extensions.Text {
    [Export(typeof(EditorFormatDefinition))]
    [ClassificationType(ClassificationTypeNames = LineHighlight.NAME)]
    [Name(LineHighlight.NAME)]
-   [DisplayName("Current Line")]
    [UserVisible(true)]
    [Order(Before = Priority.Default)]
    sealed class CurrentLineFormat : ClassificationFormatDefinition {
