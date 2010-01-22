@@ -16,7 +16,7 @@ options dialog.
    extensions.
 2. Open the solution in Visual Studio 2010 and build it.
 3. Close all open VS2010 instances.
-3. Using Windows Explorer, navigate to the project's output folder and double
+4. Using Windows Explorer, navigate to the project's output folder and double
    click on the LineAdornments.vsix generated.
 
 That's it!
